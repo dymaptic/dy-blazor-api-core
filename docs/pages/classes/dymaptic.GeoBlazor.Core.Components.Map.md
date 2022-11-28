@@ -75,6 +75,19 @@ public System.Collections.Generic.HashSet<dymaptic.GeoBlazor.Core.Components.Lay
 
 #### Property Value
 [System.Collections.Generic.HashSet&lt;](https://docs.microsoft.com/en-us/dotnet/api/System.Collections.Generic.HashSet-1 'System.Collections.Generic.HashSet`1')[Layer](dymaptic.GeoBlazor.Core.Components.Layers.Layer.html 'dymaptic.GeoBlazor.Core.Components.Layers.Layer')[&gt;](https://docs.microsoft.com/en-us/dotnet/api/System.Collections.Generic.HashSet-1 'System.Collections.Generic.HashSet`1')
+
+<a name='dymaptic.GeoBlazor.Core.Components.Map.Tables'></a>
+
+## Map.Tables Property
+
+A collection of [Layer](dymaptic.GeoBlazor.Core.Components.Layers.Layer.html 'dymaptic.GeoBlazor.Core.Components.Layers.Layer') instances that are tables saved in a Map.
+
+```csharp
+public System.Collections.Generic.HashSet<dymaptic.GeoBlazor.Core.Components.Layers.Layer> Tables { get; set; }
+```
+
+#### Property Value
+[System.Collections.Generic.HashSet&lt;](https://docs.microsoft.com/en-us/dotnet/api/System.Collections.Generic.HashSet-1 'System.Collections.Generic.HashSet`1')[Layer](dymaptic.GeoBlazor.Core.Components.Layers.Layer.html 'dymaptic.GeoBlazor.Core.Components.Layers.Layer')[&gt;](https://docs.microsoft.com/en-us/dotnet/api/System.Collections.Generic.HashSet-1 'System.Collections.Generic.HashSet`1')
 ### Methods
 
 <a name='dymaptic.GeoBlazor.Core.Components.Map.RegisterChildComponent(dymaptic.GeoBlazor.Core.Components.MapComponent)'></a>

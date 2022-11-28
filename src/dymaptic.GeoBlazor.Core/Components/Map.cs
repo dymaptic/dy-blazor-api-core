@@ -37,6 +37,11 @@ public class Map : MapComponent
     /// </summary>
     public HashSet<Layer> Layers { get; set; } = new();
 
+    /// <summary>
+    ///     A collection of <see cref="Layer"/> instances that are tables saved in a Map.
+    /// </summary>
+    public HashSet<Layer> Tables { get; set; } = new();  
+
     /// <inheritdoc />
     public override async Task RegisterChildComponent(MapComponent child)
     {
