@@ -2,9 +2,61 @@
 @using dymaptic.GeoBlazor.Core.Components.Widgets.LayerList
 @inject IJSRuntime JsRuntime
 
-<PageTitle>LayerLists</PageTitle>
+<PageTitle>TableLists</PageTitle>
 <h1>TableLists</h1>
+<div class="links-div">
+    <a class="btn btn-secondary" target="_blank" href="https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-LayerList.html">ArcGIS API for JavaScript Reference</a>
+    <a class="btn btn-primary" target="_blank" href="https://www.arcgis.com/home/item.html?id=62f9d6aabd024931a940c5f00d74d0ac">Chicago Coronavirus Deaths-Cook County Medical Examiner's Office</a>
+</div>
+<p class="instructions">
+    A simple demo of loading multiple layers into the TableList widget.
+    Select the right arrow to open the sublayers within the layer.
+    Select the "eye" icons to toggle a layer's visibility on the basemap.
+</p>
+
+@if (_windowWidth is not null)
+{
+    if (_windowWidth >= 800)
+    {
+        <SceneView @ref="_view" Class="map-view">
+            <WebMap>
+                <PortalItem Id="62f9d6aabd024931a940c5f00d74d0ac" />
+            </WebMap>
+            <TableListWidget Position="OverlayPosition.TopRight" OnListItemCreatedHandler="OnListItemCreated" />
+        </SceneView>
+    }
+    else // for mobile, move the widget off of the map so you can see the whole map
+    {
+        <div id="widget-holder" />
+        <SceneView @ref="_view" Class="map-view">
+             <WebMap>
+                <PortalItem Id="62f9d6aabd024931a940c5f00d74d0ac" />
+            </WebMap>
+            <TableListWidget ContainerId="widget-holder" OnListItemCreatedHandler="OnListItemCreated" />
+        </SceneView>
+    }
+}
 
 @code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        int? oldWidth = _windowWidth;
+        _windowWidth = await JsRuntime.InvokeAsync<int>("window.getWidth");
+        if (oldWidth != _windowWidth)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private int? _windowWidth;
+    private SceneView? _view;
+
+    private Task<ListItem> OnListItemCreated(ListItem item)
+    {
+        item.Visible = true;
+        
+        return Task.Run(() => item);
+    }
 
 }
