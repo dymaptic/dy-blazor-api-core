@@ -18,22 +18,22 @@
 {
     if (_windowWidth >= 800)
     {
-        <SceneView @ref="_view" Class="map-view">
+        <MapView @ref="_view" Class="map-view">
             <WebMap>
                 <PortalItem Id="62f9d6aabd024931a940c5f00d74d0ac" />
             </WebMap>
             <TableListWidget Position="OverlayPosition.TopRight" OnListItemCreatedHandler="OnListItemCreated" />
-        </SceneView>
+        </MapView>
     }
     else // for mobile, move the widget off of the map so you can see the whole map
     {
         <div id="widget-holder" />
-        <SceneView @ref="_view" Class="map-view">
+        <MapView @ref="_view" Class="map-view">
              <WebMap>
                 <PortalItem Id="62f9d6aabd024931a940c5f00d74d0ac" />
             </WebMap>
             <TableListWidget ContainerId="widget-holder" OnListItemCreatedHandler="OnListItemCreated" />
-        </SceneView>
+        </MapView>
     }
 }
 
@@ -50,7 +50,7 @@
     }
 
     private int? _windowWidth;
-    private SceneView? _view;
+    private MapView? _view;
 
     private Task<ListItem> OnListItemCreated(ListItem item)
     {

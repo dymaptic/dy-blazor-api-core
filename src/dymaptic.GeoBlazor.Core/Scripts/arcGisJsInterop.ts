@@ -46,6 +46,7 @@ import ListItem from "@arcgis/core/widgets/LayerList/ListItem";
 import Extent from "@arcgis/core/geometry/Extent";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import Geometry from "@arcgis/core/geometry/Geometry";
+import TableList from "@arcgis/core/widgets/TableList";
 
 import {
     buildDotNetExtent,
@@ -65,6 +66,7 @@ import {
 import {
     DotNetExtent,
     DotNetGeometry,
+    
     DotNetGraphic, DotNetListItem,
     DotNetPoint,
     DotNetSpatialReference,
@@ -971,6 +973,15 @@ export async function addWidget(widget: any, viewId: string): Promise<void> {
                 }
                 
                 break;
+            case 'tableList':
+                const tableList = new TableList({
+                    map: map
+                });
+                newWidget = tableListWidget;
+                if (widget.HasCustomTableListHandler) {
+                    tableListWidget.
+                }
+
             case 'expand':
                 await addWidget(widget.content, viewId);
                 let content = arcGisObjectRefs[widget.content.id] as Widget;
