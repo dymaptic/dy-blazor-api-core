@@ -1012,10 +1012,11 @@ export async function addWidget(widget: any, viewId: string): Promise<void> {
                 break;
             case 'tableList':
                 const tableList = new TableList({
-                    map: map
+                    map: map,
+                    table: table
                 });
                 newWidget = tableListWidget;
-                if (widget.HasCustomTableListHandler) {
+                if (hasValue(widget.HasCustomTableListHandler)) {
                     tableListWidget.
                 }
 
