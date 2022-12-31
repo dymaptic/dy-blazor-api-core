@@ -1011,15 +1011,30 @@ export async function addWidget(widget: any, viewId: string): Promise<void> {
                 }
                 break;
             case 'tableList':
-                const tableList = new TableList({
+                const tableListWidget = new TableList({
                     map: map,
                     table: table
                 });
                 newWidget = tableListWidget;
                 if (hasValue(widget.HasCustomTableListHandler)) {
-                    tableListWidget.
+                    tableListWidget.listItemCreatedFunction = async (evt) => {
+                        let dotNetListItem = buildDotNetListItem(evt.item);
+                        let returnItem = await widget.tableListWidgetObjectReference.invokeMethodAsync('OnListItemCreated', dotNetListItem) as DotNetListItem;
+                        evt.item.title = returnItem.title;
+                        evt.item.visible = returnItem.visible;
+                        evt.item.layer = returnItem.layer; //--> needs implementation
+                        evt.item.children = returnItem.children; evt.item.actionSections = returnItem.actionSections as any;
+                    };
                 }
 
+                if (hasValue(widget.iconClass)) {
+                    tableListWidget.iconClass = widget.iconClass;
+                }
+                if (hasValue(widget.label)) {
+                    tableListWidget.label = widget.label;
+                }
+                break;
+                    
             case 'expand':
                 await addWidget(widget.content, viewId);
                 let content = arcGisObjectRefs[widget.content.id] as Widget;
