@@ -1012,25 +1012,24 @@ export async function addWidget(widget: any, viewId: string): Promise<void> {
                 break;
             case 'tableList':
                 const tableListWidget = new TableList({
-                    map: map,
-                    table: table
+                    map: webmap
                 });
                 newWidget = tableListWidget;
-                if (hasValue(widget.HasCustomTableListHandler)) {
+                if (hasValue(widget.HasCustomHandler)) {
                     tableListWidget.listItemCreatedFunction = async (evt) => {
                         let dotNetListItem = buildDotNetListItem(evt.item);
-                        let returnItem = await widget.tableListWidgetObjectReference.invokeMethodAsync('OnListItemCreated', dotNetListItem) as DotNetListItem;
+                        let returnItem = await widget.layerListWidgetObjectReference.invokeMethodAsync('OnListItemCreated', dotNetListItem) as DotNetListItem;
                         evt.item.title = returnItem.title;
                         evt.item.visible = returnItem.visible;
-                        evt.item.layer = returnItem.layer; //--> needs implementation
-                        evt.item.children = returnItem.children; evt.item.actionSections = returnItem.actionSections as any;
+                        evt.item.layer = returnItem.layer;
+                        evt.item.children = returnItem.children;
+                        evt.item.actionSections = returnItem.actionSections as any;
                     };
                 }
-
-                if (hasValue(widget.iconClass)) {
+                if (widget.iconClass !== undefined && widget.iconClass !== null) {
                     tableListWidget.iconClass = widget.iconClass;
                 }
-                if (hasValue(widget.label)) {
+                if (widget.label !== undefined && widget.label !== null) {
                     tableListWidget.label = widget.label;
                 }
                 break;
