@@ -1064,7 +1064,7 @@ export async function addWidget(widget: any, viewId: string): Promise<void> {
                 break;
             case 'tableList':
                 const tableListWidget = new TableList({
-                    map: webmap
+                    map: map
                 });
                 newWidget = tableListWidget;
                 if (hasValue(widget.HasCustomHandler)) {
