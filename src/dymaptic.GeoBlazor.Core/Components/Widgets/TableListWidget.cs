@@ -38,7 +38,7 @@ namespace dymaptic.GeoBlazor.Core.Components.Widgets
 		/// </summary>
 		[Parameter]
 		[JsonIgnore]
-		public Map? Map { get; set; }
+		public WebMap? Map { get; set; }
 
 		/// <summary>
 		///     The collection of table ListItems displayed within the widget..
