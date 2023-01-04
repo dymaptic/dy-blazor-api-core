@@ -79,6 +79,7 @@ import {
 } from "./definitions";
 import HitTestResult = __esri.HitTestResult;
 import MapViewHitTestOptions = __esri.MapViewHitTestOptions;
+import { table } from "console";
 
 export let arcGisObjectRefs: Record<string, Accessor> = {};
 export let dotNetRefs = {};
@@ -1064,7 +1065,8 @@ export async function addWidget(widget: any, viewId: string): Promise<void> {
                 break;
             case 'tableList':
                 const tableListWidget = new TableList({
-                    map: map
+                    container: "viewDiv",
+                    map: arcGisObjectRefs[]
                 });
                 newWidget = tableListWidget;
                 if (hasValue(widget.HasCustomHandler)) {

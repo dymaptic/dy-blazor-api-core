@@ -40,10 +40,11 @@ namespace dymaptic.GeoBlazor.Core.Components.Widgets
 		[JsonIgnore]
 		public Map? Map { get; set; }
 
-		/// <summary>
-		///     The collection of table ListItems displayed within the widget..
-		/// </summary>
-		[Parameter]
+        /// <summary>
+        ///     The collection of table ListItems displayed within the widget..
+        /// </summary>
+ 
+        [Parameter]
 		[JsonIgnore]
 		public List<ListItem>? TableItems { get; set; }
 
