@@ -1065,8 +1065,8 @@ export async function addWidget(widget: any, viewId: string): Promise<void> {
                 break;
             case 'tableList':
                 const tableListWidget = new TableList({
-                    container: "viewDiv",
-                    map: arcGisObjectRefs[]
+                    //container: "viewDiv",
+                    //map: arcGisObjectRefs[]
                 });
                 newWidget = tableListWidget;
                 if (hasValue(widget.HasCustomHandler)) {
