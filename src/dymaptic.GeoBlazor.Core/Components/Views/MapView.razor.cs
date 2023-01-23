@@ -36,12 +36,6 @@ public partial class MapView : MapComponent
     public IConfiguration Configuration { get; set; } = default!;
 
     /// <summary>
-    ///     Represents an instance of a JavaScript runtime to which calls may be dispatched.
-    /// </summary>
-    [Inject]
-    public IJSRuntime JsRuntime { get; set; } = default!;
-
-    /// <summary>
     ///     Inline css styling attribute
     /// </summary>
     [Parameter]
@@ -147,6 +141,12 @@ public partial class MapView : MapComponent
     /// </summary>
     [Parameter]
     public bool? AllowDefaultEsriLogin { get; set; }
+    
+    /// <summary>
+    ///    Boolean flag that can be set to false to prevent the MapView from automatically rendering with the Blazor components.
+    /// </summary>
+    [Parameter]
+    public bool LoadOnRender { get; set; } = true;
 
     /// <summary>
     ///     Provides an override for the default behavior of requiring an API key. By setting to "false", all calls to ArcGIS services will trigger a sign-in popup.
@@ -526,6 +526,21 @@ public partial class MapView : MapComponent
     public EventCallback<KeyUpEvent> OnKeyUp { get; set; }
 
     /// <summary>
+    ///    JS-Invokable callback that signifies when the view is created but not yet fully rendered.
+    /// </summary>
+    [JSInvokable]
+    public async Task OnJsViewInitialized()
+    {
+        await OnViewInitialized.InvokeAsync();
+    }
+    
+    /// <summary>
+    ///     Event triggered when the JS view is created, but before the full map is rendered.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnViewInitialized { get; set; }
+
+    /// <summary>
     ///     JS-Invokable method to return when the map view is fully rendered.
     /// </summary>
     [JSInvokable]
@@ -640,17 +655,37 @@ public partial class MapView : MapComponent
     ///     The new <see cref="LayerViewCreateEvent"/>
     /// </param>
     [JSInvokable]
-    public async Task OnJavascriptLayerViewCreate(LayerViewCreateEvent layerViewCreateEvent)
+    public async Task OnJavascriptLayerViewCreate(LayerViewCreateInternalEvent layerViewCreateEvent)
     {
-        LayerView layerView = layerViewCreateEvent.LayerView;
+        LayerView layerView = layerViewCreateEvent.Layer switch
+        {
+            FeatureLayer => new FeatureLayerView(layerViewCreateEvent.LayerView, new AbortManager(JsRuntime)),
+            _ => layerViewCreateEvent.LayerView
+        };
+
         layerView.JsObjectReference = layerViewCreateEvent.LayerViewObjectRef;
+        
         Layer? createdLayer = Map?.Layers.FirstOrDefault(l => l.Id == layerViewCreateEvent.LayerGeoBlazorId);
         if (createdLayer != null)
         {
-            createdLayer.LayerView = layerViewCreateEvent.LayerView;
-            createdLayer.JsObjectReference = layerViewCreateEvent.LayerObjectRef;
+            createdLayer.LayerView = layerView;
+
+            createdLayer.JsObjectReference ??= layerViewCreateEvent.LayerObjectRef;
+            
+            createdLayer.AbortManager = new AbortManager(JsRuntime);
+            if (createdLayer is FeatureLayer featureLayer)
+            {
+                featureLayer.UpdateFromJavaScript((FeatureLayer)layerViewCreateEvent.Layer);
+            }
+
+            layerView.Layer = createdLayer;
         }
-        await OnLayerViewCreate.InvokeAsync(layerViewCreateEvent);
+        else
+        {
+            layerView.Layer = layerViewCreateEvent.Layer;
+        }
+        
+        await OnLayerViewCreate.InvokeAsync(new LayerViewCreateEvent(layerView.Layer, layerView));
     }
 
     /// <summary>
@@ -790,6 +825,17 @@ public partial class MapView : MapComponent
         StateHasChanged();
     }
 
+    /// <summary>
+    ///     Manually loads and renders the MapView, if the consumer has also set <see cref="LoadOnRender"/> to false.
+    ///     If <see cref="LoadOnRender"/> is true, this method will function the same as <see cref="Refresh"/>.
+    /// </summary>
+    public void Load()
+    {
+        _renderCalled = true;
+        NeedsRender = true;
+        StateHasChanged();
+    }
+
     /// <inheritdoc />
     public override async Task UpdateComponent()
     {
@@ -798,12 +844,15 @@ public partial class MapView : MapComponent
             return;
         }
 
-        foreach (KeyValuePair<string, object?> kvp in NewPropertyValues)
+        if (NewPropertyValues.Any())
         {
-            await ViewJsModule!.InvokeVoidAsync("updateView", kvp.Key, kvp.Value, Id);
+            foreach (KeyValuePair<string, object?> kvp in NewPropertyValues)
+            {
+                await ViewJsModule!.InvokeVoidAsync("updateView", kvp.Key, kvp.Value, Id);
+            }
+            
+            NewPropertyValues.Clear();
         }
-
-        NewPropertyValues.Clear();
     }
 
     /// <inheritdoc />
@@ -828,21 +877,11 @@ public partial class MapView : MapComponent
 
                 break;
             case Widget widget:
-                if (!Widgets.Contains(widget))
-                {
-                    Widgets.Add(widget);
-                    widget.Parent ??= this;
-                    await AddWidget(widget);
-                }
+                await AddWidget(widget);
 
                 break;
             case Graphic graphic:
-                if (!Graphics.Contains(graphic))
-                {
-                    graphic.GraphicIndex = Graphics.Count;
-                    Graphics.Add(graphic);
-                    await AddGraphic(graphic);
-                }
+                await AddGraphic(graphic);
 
                 break;
             case SpatialReference spatialReference:
@@ -900,27 +939,11 @@ public partial class MapView : MapComponent
 
                 break;
             case Widget widget:
-                if (Widgets.Contains(widget))
-                {
-                    Widgets.Remove(widget);
-
-                    if (MapRendered)
-                    {
-                        await RemoveWidget(widget);
-                    }
-                }
+                await RemoveWidget(widget);
 
                 break;
             case Graphic graphic:
-                if (Graphics.Contains(graphic))
-                {
-                    Graphics.Remove(graphic);
-
-                    if (MapRendered)
-                    {
-                        await RemoveGraphicAtIndex(graphic.GraphicIndex!.Value);
-                    }
-                }
+                await RemoveGraphicAtIndex(graphic.GraphicIndex!.Value);
 
                 break;
             case Constraints _:
@@ -1039,6 +1062,25 @@ public partial class MapView : MapComponent
         await ViewJsModule!.InvokeVoidAsync("showPopupWithGraphic", (object)graphic,
             (object)options, Id);
     }
+    
+    /// <summary>
+    ///     Opens the popup at the given location with content defined either explicitly with content or driven from the PopupTemplate of input features. This method sets the popup's visible property to true. Users can alternatively open the popup by directly setting the visible property to true.
+    /// </summary>
+    /// <param name="options">
+    ///     Defines the location and content of the popup when opened.
+    /// </param>
+    public async Task OpenPopup(PopupOpenOptions? options = null)
+    {
+        await ViewJsModule!.InvokeVoidAsync("openPopup", Id, options);
+    }
+
+    /// <summary>
+    ///     Closes the popup by setting its visible property to false. Users can alternatively close the popup by directly setting the visible property to false.
+    /// </summary>
+    public async Task ClosePopup()
+    {
+        await ViewJsModule!.InvokeVoidAsync("closePopup", Id);
+    }
 
     /// <summary>
     ///     Adds a <see cref="Graphic"/> to the current view, or to a <see cref="GraphicsLayer"/>.
@@ -1051,6 +1093,12 @@ public partial class MapView : MapComponent
     /// </param>
     public async Task AddGraphic(Graphic graphic, int? layerIndex = null)
     {
+        if (!Graphics.Contains(graphic))
+        {
+            graphic.GraphicIndex = Graphics.Count;
+            Graphics.Add(graphic);
+        }
+        
         if (ViewJsModule is null) return;
 
         await ViewJsModule!.InvokeVoidAsync("addGraphic", (object)graphic, Id, layerIndex);
@@ -1061,6 +1109,8 @@ public partial class MapView : MapComponent
     /// </summary>
     public async Task ClearGraphics()
     {
+        Graphics.Clear();
+        if (ViewJsModule is null) return;
         await ViewJsModule!.InvokeVoidAsync("clearViewGraphics", Id);
     }
 
@@ -1075,6 +1125,14 @@ public partial class MapView : MapComponent
     /// </param>
     public async Task AddLayer(Layer layer, bool? isBasemapLayer = false)
     {
+        if (Map?.Layers.Contains(layer) == false)
+        {
+            Type typeOfLayer = layer.GetType();
+            IEnumerable<Layer> allLayersOfType = Map.Layers.Where(l => l.GetType() == typeOfLayer);
+            layer.LayerIndex = allLayersOfType.Count();
+            Map.Layers.Add(layer);
+        }
+        
         if (ViewJsModule is null) return;
 
         await ViewJsModule!.InvokeVoidAsync("addLayer", (object)layer, Id, isBasemapLayer);
@@ -1141,6 +1199,7 @@ public partial class MapView : MapComponent
     /// </param>
     public async Task RemoveGraphicAtIndex(int index, int? layerIndex = null)
     {
+        await RemoveGraphicsFromCollection(index, layerIndex);
         await ViewJsModule!.InvokeVoidAsync("removeGraphicAtIndex", index, layerIndex, Id);
     }
 
@@ -1155,6 +1214,10 @@ public partial class MapView : MapComponent
     /// </param>
     public async Task RemoveGraphicsAtIndexes(int[] indexes, int? layerIndex = null)
     {
+        foreach (int index in indexes)
+        {
+            await RemoveGraphicsFromCollection(index, layerIndex);
+        }
         await ViewJsModule!.InvokeVoidAsync("removeGraphicsAtIndexes", indexes, layerIndex, Id);
     }
 
@@ -1348,28 +1411,15 @@ public partial class MapView : MapComponent
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         ApiKey = Configuration["ArcGISApiKey"];
+        
+        if (!LoadOnRender && !_renderCalled)
+        {
+            NeedsRender = false;
+        }
 
         if (firstRender)
         {
-            LicenseType licenseType = Licensing.GetLicenseType();
-
-            switch ((int)licenseType)
-            {
-                case >= 100:
-                    // this is here to support the interactive extension library
-                    IJSObjectReference interactiveModule = await JsRuntime
-                        .InvokeAsync<IJSObjectReference>("import",
-                            "./_content/dymaptic.GeoBlazor.Interactive/js/arcGisInteractive.js");
-                    ViewJsModule = await interactiveModule.InvokeAsync<IJSObjectReference>("getCore");
-
-                    break;
-                default:
-                    ViewJsModule = await JsRuntime
-                        .InvokeAsync<IJSObjectReference>("import",
-                            "./_content/dymaptic.GeoBlazor.Core/js/arcGisJsInterop.js");
-
-                    break;
-            }
+            ViewJsModule = await GetArcGisJsInterop();
 
             JsModule = ViewJsModule;
 
@@ -1450,7 +1500,18 @@ public partial class MapView : MapComponent
 
     private async Task AddWidget(Widget widget)
     {
+        if (!Widgets.Contains(widget))
+        {
+            Widgets.Add(widget);
+            widget.Parent ??= this;
+        }
+        
         if (ViewJsModule is null) return;
+        
+        while (Rendering)
+        {
+            await Task.Delay(100);
+        }
 
         await InvokeAsync(async () =>
         {
@@ -1460,9 +1521,23 @@ public partial class MapView : MapComponent
 
     private async Task RemoveWidget(Widget widget)
     {
+        if (ViewJsModule is null) return;
+        
+        if (Widgets.Contains(widget))
+        {
+            Widgets.Remove(widget);
+        }
+        
         await InvokeAsync(async () =>
         {
-            await ViewJsModule!.InvokeVoidAsync("removeWidget", widget.Id, Id);
+            try
+            {
+                await ViewJsModule!.InvokeVoidAsync("removeWidget", widget.Id, Id);
+            }
+            catch (JSDisconnectedException)
+            {
+                // ignore, dispose is called by Blazor too early
+            }
         });
     }
 
@@ -1502,6 +1577,37 @@ public partial class MapView : MapComponent
         return activeHandlers;
     }
 
+    private async Task RemoveGraphicsFromCollection(int index, int? layerIndex)
+    {
+        if (layerIndex is null)
+        {
+            Graphics.RemoveAt(index);
+        }
+        else
+        {
+            Layer? indexedLayer = Map?.Layers.FirstOrDefault(l => l.LayerIndex == layerIndex);
+
+            if (indexedLayer is GraphicsLayer graphicsLayer)
+            {
+                Graphic? graphic = graphicsLayer.Graphics.FirstOrDefault(g => g.GraphicIndex == index);
+
+                if (graphic is not null)
+                {
+                    await graphicsLayer.Remove(graphic);
+                }
+            }
+            else if (indexedLayer is FeatureLayer featureLayer)
+            {
+                Graphic? graphic = featureLayer.Source?.FirstOrDefault(g => g.GraphicIndex == index);
+
+                if (graphic is not null)
+                {
+                    await featureLayer.Remove(graphic);
+                }
+            }
+        }
+    }
+
     /// <summary>
     ///     A reference to the arcGisJsInterop module
     /// </summary>
@@ -1532,4 +1638,5 @@ public partial class MapView : MapComponent
     private string? _apiKey;
     private SpatialReference? _spatialReference;
     private Dictionary<Guid, StringBuilder> _hitTestResults = new();
+    private bool _renderCalled;
 }
