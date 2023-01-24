@@ -1302,9 +1302,10 @@ function createWidget(widget: any, viewId: string): Widget | null {
             const webmap = new WebMap();
             const tableListWidget = new TableList({
                 container: "viewDiv",
-                map: webmap 
+                map: webmap,
+                selectionEnabled: true
             });
-            const view.
+
             newWidget = tableListWidget;
             if (hasValue(widget.HasCustomHandler)) {
                 tableListWidget.listItemCreatedFunction = async (evt) => {
@@ -1323,12 +1324,7 @@ function createWidget(widget: any, viewId: string): Widget | null {
             if (widget.label !== undefined && widget.label !== null) {
                 tableListWidget.label = widget.label;
             }
-            if (widget.layer !== undefined && widget.layer !== null) {
-                tableListWidget.layer = widget.layer;
-            }
-            if (widget.label !== undefined && widget.label !== null) {
-                tableListWidget.label = widget.label;
-            }
+
             break;
         case 'expand':
             createWidget(widget.content, viewId);

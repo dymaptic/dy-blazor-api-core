@@ -65,10 +65,10 @@
         return Task.Run(() => item);
     }*@
 
-    private Task<Layer>
+
     private Task<ListItem> OnListItemCreated(ListItem item)
     {
-        
+        if (item.Layer.L)
         return Task.Run(() => item);
     }
 
