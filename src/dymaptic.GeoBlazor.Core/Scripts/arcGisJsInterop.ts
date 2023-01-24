@@ -1299,10 +1299,12 @@ function createWidget(widget: any, viewId: string): Widget | null {
             }
             break;
         case 'tableList':
+            const webmap = new WebMap();
             const tableListWidget = new TableList({
-                //container: "viewDiv",
-                //map: arcGisObjectRefs[]
+                container: "viewDiv",
+                map: webmap 
             });
+            const view.
             newWidget = tableListWidget;
             if (hasValue(widget.HasCustomHandler)) {
                 tableListWidget.listItemCreatedFunction = async (evt) => {
@@ -1316,10 +1318,16 @@ function createWidget(widget: any, viewId: string): Widget | null {
                 };
             }
             if (widget.iconClass !== undefined && widget.iconClass !== null) {
-                basemapLayerListWidget.iconClass = widget.iconClass;
+                tableListWidget.iconClass = widget.iconClass;
             }
             if (widget.label !== undefined && widget.label !== null) {
-                basemapLayerListWidget.label = widget.label;
+                tableListWidget.label = widget.label;
+            }
+            if (widget.layer !== undefined && widget.layer !== null) {
+                tableListWidget.layer = widget.layer;
+            }
+            if (widget.label !== undefined && widget.label !== null) {
+                tableListWidget.label = widget.label;
             }
             break;
         case 'expand':

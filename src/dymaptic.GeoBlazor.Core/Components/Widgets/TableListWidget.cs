@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using dymaptic.GeoBlazor.Core.Components.Layers;
 using dymaptic.GeoBlazor.Core.Components.Widgets.LayerList;
 using Microsoft.AspNetCore.Components;
 
@@ -43,16 +45,26 @@ namespace dymaptic.GeoBlazor.Core.Components.Widgets
         /// <summary>
         ///     The collection of table ListItems displayed within the widget..
         /// </summary>
- 
+
         [Parameter]
 		[JsonIgnore]
 		public List<ListItem>? TableItems { get; set; }
 
-		/// <summary>
-		///     A delegate to implement a custom handler for setting up each <see cref="ListItem"/>.
-		///     Function must take in a ListItem and return a Task with the same (updated) item.
-		/// </summary>
-		[Parameter]
+        /// <summary>
+        ///     If a map contains feature layer tables, they will display within the widget. Tables
+        ///     can also be added to the map's tables collection. Any tables referenced in the map
+        ///     property will display in the widget. If unsure of whether the layer is a table, 
+        ///     check the feature layer's isTable property.
+        /// </summary>
+
+        [Parameter]
+        [JsonIgnore]
+        public Layer? Layer { get; set; }
+        /// <summary>
+        ///     A delegate to implement a custom handler for setting up each <see cref="ListItem"/>.
+        ///     Function must take in a ListItem and return a Task with the same (updated) item.
+        /// </summary>
+        [Parameter]
         [JsonIgnore]
         public Func<ListItem, Task<ListItem>>? OnListItemCreatedHandler { get; set; }
 
@@ -61,7 +73,8 @@ namespace dymaptic.GeoBlazor.Core.Components.Widgets
 		/// </summary>
 		public bool HasCustomHandler => OnListItemCreatedHandler is not null;
 
-
+        
+        
 
 
 	}

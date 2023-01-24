@@ -52,6 +52,20 @@ public dymaptic.GeoBlazor.Core.Components.Geometries.Extent? FullExtent { get; s
 #### Property Value
 [Extent](dymaptic.GeoBlazor.Core.Components.Geometries.Extent.html 'dymaptic.GeoBlazor.Core.Components.Geometries.Extent')
 
+<a name='dymaptic.GeoBlazor.Core.Components.Layers.Layer.IsTable'></a>
+
+## Layer.IsTable Property
+
+If a map contains feature layer tables, they will display within the widget. Tables can also be added to the map's tables collection. Any tables referenced in the map property will display  
+in the widget. If unsure of whether the layer is a table, check the feature layer's isTable property.
+
+```csharp
+public System.Nullable<bool> IsTable { get; set; }
+```
+
+#### Property Value
+[System.Nullable&lt;](https://docs.microsoft.com/en-us/dotnet/api/System.Nullable-1 'System.Nullable`1')[System.Boolean](https://docs.microsoft.com/en-us/dotnet/api/System.Boolean 'System.Boolean')[&gt;](https://docs.microsoft.com/en-us/dotnet/api/System.Nullable-1 'System.Nullable`1')
+
 <a name='dymaptic.GeoBlazor.Core.Components.Layers.Layer.JsObjectReference'></a>
 
 ## Layer.JsObjectReference Property

@@ -67,7 +67,16 @@ public abstract class Layer : MapComponent
     [Parameter]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Visible { get; set; }
-    
+
+    /// <summary>
+    ///     If a map contains feature layer tables, they will display within the widget. Tables can also be added to the map's tables collection. Any tables referenced in the map property will display
+    ///     in the widget. If unsure of whether the layer is a table, check the feature layer's isTable property.
+    /// </summary>
+
+    [Parameter]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? IsTable { get; set; }
+
     /// <summary>
     ///     The full extent of the layer. By default, this is worldwide. This property may be used to set the extent of the view to match a layer's extent so that its features appear to fill the view.
     /// </summary>

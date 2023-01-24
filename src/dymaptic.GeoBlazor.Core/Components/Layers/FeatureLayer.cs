@@ -118,6 +118,15 @@ public class FeatureLayer : Layer
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public SpatialReference? SpatialReference { get; set; }
+    
+    /// <summary>
+    ///     If a map contains feature layer tables, they will display within the widget. Tables can also be added to the map's tables collection. Any tables referenced in the map property will display
+    ///     in the widget. If unsure of whether the layer is a table, check the feature layer's isTable property.
+    /// </summary>
+
+    [Parameter]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? IsTable { get; set; }
 
     /// <summary>
     ///     A collection of Graphic objects used to create a FeatureLayer.
@@ -296,6 +305,10 @@ public class FeatureLayer : Layer
         if (renderedFeatureLayer.Relationships is not null)
         {
             Relationships = renderedFeatureLayer.Relationships;
+        }
+        if (renderedFeatureLayer.IsTable is not null)
+        {
+            IsTable = renderedFeatureLayer.IsTable;
         }
     }
 

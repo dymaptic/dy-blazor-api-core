@@ -1,5 +1,6 @@
 ﻿@page "/table-lists"
-@using dymaptic.GeoBlazor.Core.Components.Widgets.LayerList
+@using dymaptic.GeoBlazor.Core.Components.Widgets.LayerList;
+@using dymaptic.GeoBlazor.Core.Components.Widgets;
 @inject IJSRuntime JsRuntime
 
 <PageTitle>TableLists</PageTitle>
@@ -51,12 +52,25 @@
 
     private int? _windowWidth;
     private MapView? _view;
-    
+
+    @*private Task<ListItem> OnListItemCreated(ListItem item)
+    {
+        FeatureLayer table = new FeatureLayer();
+        if (table?.IsTable == true)
+        {
+            item.Layer?.Add(table);
+        }
+        item.Visible = true;
+
+        return Task.Run(() => item);
+    }*@
+
+    private Task<Layer>
     private Task<ListItem> OnListItemCreated(ListItem item)
     {
-        item.Visible = true;
         
         return Task.Run(() => item);
     }
+
 
 }

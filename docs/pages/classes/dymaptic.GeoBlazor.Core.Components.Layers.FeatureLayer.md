@@ -60,6 +60,20 @@ public System.Nullable<dymaptic.GeoBlazor.Core.Components.Geometries.GeometryTyp
 #### Property Value
 [System.Nullable&lt;](https://docs.microsoft.com/en-us/dotnet/api/System.Nullable-1 'System.Nullable`1')[GeometryType](dymaptic.GeoBlazor.Core.Components.Geometries.GeometryType.html 'dymaptic.GeoBlazor.Core.Components.Geometries.GeometryType')[&gt;](https://docs.microsoft.com/en-us/dotnet/api/System.Nullable-1 'System.Nullable`1')
 
+<a name='dymaptic.GeoBlazor.Core.Components.Layers.FeatureLayer.IsTable'></a>
+
+## FeatureLayer.IsTable Property
+
+If a map contains feature layer tables, they will display within the widget. Tables can also be added to the map's tables collection. Any tables referenced in the map property will display  
+in the widget. If unsure of whether the layer is a table, check the feature layer's isTable property.
+
+```csharp
+public System.Nullable<bool> IsTable { get; set; }
+```
+
+#### Property Value
+[System.Nullable&lt;](https://docs.microsoft.com/en-us/dotnet/api/System.Nullable-1 'System.Nullable`1')[System.Boolean](https://docs.microsoft.com/en-us/dotnet/api/System.Boolean 'System.Boolean')[&gt;](https://docs.microsoft.com/en-us/dotnet/api/System.Nullable-1 'System.Nullable`1')
+
 <a name='dymaptic.GeoBlazor.Core.Components.Layers.FeatureLayer.LabelingInfo'></a>
 
 ## FeatureLayer.LabelingInfo Property

@@ -57,6 +57,22 @@ public string? Label { get; set; }
 #### Property Value
 [System.String](https://docs.microsoft.com/en-us/dotnet/api/System.String 'System.String')
 
+<a name='dymaptic.GeoBlazor.Core.Components.Widgets.TableListWidget.Layer'></a>
+
+## TableListWidget.Layer Property
+
+If a map contains feature layer tables, they will display within the widget. Tables  
+can also be added to the map's tables collection. Any tables referenced in the map  
+property will display in the widget. If unsure of whether the layer is a table,   
+check the feature layer's isTable property.
+
+```csharp
+public dymaptic.GeoBlazor.Core.Components.Layers.Layer? Layer { get; set; }
+```
+
+#### Property Value
+[Layer](dymaptic.GeoBlazor.Core.Components.Layers.Layer.html 'dymaptic.GeoBlazor.Core.Components.Layers.Layer')
+
 <a name='dymaptic.GeoBlazor.Core.Components.Widgets.TableListWidget.Map'></a>
 
 ## TableListWidget.Map Property
