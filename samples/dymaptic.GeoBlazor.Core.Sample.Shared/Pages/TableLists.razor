@@ -68,9 +68,16 @@
 
     private Task<ListItem> OnListItemCreated(ListItem item)
     {
-        if (item.Layer.L)
-        return Task.Run(() => item);
-    }
+        if (item.Layer.IsTable == true)
+        {
+            return Task.Run(() => item);
+        }
+        else
+        {
+            return Task.Run(() => item);
+        }
+        
+    } 
 
 
 }
