@@ -51,7 +51,6 @@ public class Map : MapComponent
                 if (!basemap.Equals(Basemap))
                 {
                     Basemap = basemap;
-                    await UpdateComponent();
                 }
 
                 break;
@@ -76,8 +75,7 @@ public class Map : MapComponent
 
                 break;
             case Layer layer:
-                Layers.Remove(layer);
-                await UpdateComponent();
+                await View!.RemoveLayer(layer);
 
                 break;
             default:
@@ -97,15 +95,5 @@ public class Map : MapComponent
         {
             layer.ValidateRequiredChildren();
         }
-    }
-
-    /// <inheritdoc />
-    public override async Task UpdateComponent()
-    {
-        await InvokeAsync(async () =>
-        {
-            StateHasChanged();
-            await RenderView();
-        });
     }
 }
