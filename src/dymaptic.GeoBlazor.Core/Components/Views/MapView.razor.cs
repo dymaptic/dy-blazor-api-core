@@ -1185,17 +1185,14 @@ public partial class MapView : MapComponent
     /// </param>
     public async Task AddGraphic(Graphic graphic)
     {
-        if (!_graphics.Any(g => g.Equals(graphic)))
-        {
-            graphic.View = this;
-            graphic.JsModule = ViewJsModule;
-            graphic.Parent = this;
-            _graphics.Add(graphic);
+        graphic.View = this;
+        graphic.JsModule = ViewJsModule;
+        graphic.Parent = this;
+        _graphics.Add(graphic);
 
-            if (ViewJsModule is null) return;
+        if (ViewJsModule is null) return;
 
-            await ViewJsModule!.InvokeVoidAsync("addGraphic", (object)graphic, Id);
-        }
+        await ViewJsModule!.InvokeVoidAsync("addGraphic", (object)graphic, Id);
     }
 
     /// <summary>
