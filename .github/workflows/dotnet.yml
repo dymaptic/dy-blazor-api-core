@@ -30,9 +30,11 @@ jobs:
       run: dotnet build --no-restore
       working-directory: ${{ env.DOTNET_WORKINGDRIECTORY }}
     - name: Install dependencies
-      run: yarn
+      run: npm install @playwright/test                                              ║
+    - name: Install dependencies2
+      run: npx playwright install
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      run: pwsh bin/Debug/netX/playwright.ps1 install
     - name: Test
       run: dotnet test --no-build --verbosity normal
       working-directory: ${{ env.DOTNET_WORKINGDRIECTORY }}
