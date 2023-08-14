@@ -29,6 +29,10 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
       working-directory: ${{ env.DOTNET_WORKINGDRIECTORY }}
+    - name: Install dependencies
+      run: yarn
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
     - name: Test
       run: dotnet test --no-build --verbosity normal
       working-directory: ${{ env.DOTNET_WORKINGDRIECTORY }}
