@@ -19,8 +19,6 @@ public class PlaywrightTests
     {
         try
         {
-
-
             StartServer();
             string? apiKey = new ConfigurationBuilder().AddUserSecrets<PlaywrightTests>().Build()["ArcGISApiKey"];
 
@@ -46,8 +44,16 @@ public class PlaywrightTests
             }
 
             IPlaywright playwright = await Playwright.CreateAsync()!;
-            IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false });
+            IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
             IPage page = await browser.NewPageAsync();
+
+            page.Console += (_, e) =>
+            {
+                _consoleEntries.Add(DateTime.Now, e.Text);
+#if DEBUG
+                Console.WriteLine($"{DateTime.Now} {e.Type}: {e.Text}");
+#endif
+            };
 
             var renderMessage = new PageWaitForConsoleMessageOptions
             {
@@ -67,7 +73,6 @@ public class PlaywrightTests
                 await page.Locator("#api-key-field").FillAsync(apiKey!);
                 await page.Locator("#api-key-field").PressAsync("Enter");
             }
-
 
             await waitForRenderTask;
 
@@ -338,8 +343,12 @@ public class PlaywrightTests
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             pageLoadTask = page.WaitForURLAsync("https://localhost:7255/scene");
             await page.Locator("text=Scene").First.ClickAsync();
+            Console.WriteLine("button click ran");
             await pageLoadTask;
-            await waitForRenderTask;
+            Console.WriteLine(DateTime.Now + " Locator ran");
+
+            //when running headless, the render could complete before the task is run.
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -616,7 +625,7 @@ public class PlaywrightTests
 
             await page.GetByText("Show Trailheads Lines With Bike Trails Styled")
                 .CheckAsync();
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -678,7 +687,7 @@ public class PlaywrightTests
             pageLoadTask = page.WaitForURLAsync("https://localhost:7255/web-scene");
             await page.Locator("text=Web Scene").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -983,6 +992,17 @@ public class PlaywrightTests
         _serverProcess = null;
     }
 
+    private async Task RunTaskIfNotRendered(DateTime startTime, Task waitForRenderTask)
+    {
+        var lastEntry = _consoleEntries.Last();
+
+        if (lastEntry.Key > startTime.AddMinutes(.5) || !lastEntry.Value.Contains("View Render Complete"))
+        {
+            await waitForRenderTask;
+        }
+    }
+
+    private Dictionary<DateTime, string> _consoleEntries = new();
     private static Process? _serverProcess;
     private readonly string _screenShotsFolder = "../../../ScreenShots";
 }
