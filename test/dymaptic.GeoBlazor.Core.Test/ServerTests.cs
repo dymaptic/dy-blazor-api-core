@@ -114,5 +114,4 @@ public class ServerTests
     }
 
     private static Process? _serverProcess;
-    private readonly string _screenShotsFolder = "../../../ScreenShots";
 }

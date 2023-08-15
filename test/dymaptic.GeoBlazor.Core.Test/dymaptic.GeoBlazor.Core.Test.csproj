@@ -24,6 +24,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\samples\dymaptic.GeoBlazor.Core.Sample.Server\dymaptic.GeoBlazor.Core.Sample.Server.csproj" />
+        <ProjectReference Include="..\dymaptic.GeoBlazor.Core.Test.Blazor.Server\dymaptic.GeoBlazor.Core.Test.Blazor.Server.csproj" />
     </ItemGroup>
 
 </Project>
