@@ -45,7 +45,8 @@ public class PlaywrightTests
 
             IPlaywright playwright = await Playwright.CreateAsync()!;
             IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
-            IPage page = await browser.NewPageAsync();
+            var context = await browser.NewContextAsync(new BrowserNewContextOptions(){ IgnoreHTTPSErrors = true});
+            IPage page = await context.NewPageAsync();
 
             page.Console += (_, e) =>
             {
