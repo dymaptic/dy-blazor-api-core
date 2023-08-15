@@ -39,7 +39,7 @@ public class ServerTests
 
             // Go to http://localhost:5199/
 
-            await page.GotoAsync("http://localhost:5199/");
+            await page.GotoAsync("https://localhost:7161/");
             await Task.Delay(1000);
 
             await waitForRenderTask;
