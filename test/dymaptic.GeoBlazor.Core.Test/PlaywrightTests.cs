@@ -45,7 +45,7 @@ public class PlaywrightTests
 
             IPlaywright playwright = await Playwright.CreateAsync()!;
             IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
-            var context = await browser.NewContextAsync(new BrowserNewContextOptions(){ IgnoreHTTPSErrors = true});
+            var context = await browser.NewContextAsync(new BrowserNewContextOptions() { IgnoreHTTPSErrors = true });
             IPage page = await context.NewPageAsync();
 
             page.Console += (_, e) =>
@@ -64,9 +64,9 @@ public class PlaywrightTests
             await Task.Delay(1000);
             Task waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
 
-            // Go to https://localhost:7255/
+            // Go to http://localhost:5255/
 
-            await page.GotoAsync("https://localhost:7255/navigation");
+            await page.GotoAsync("http://localhost:5255/navigation");
             await Task.Delay(1000);
 
             if (await page.Locator("#api-key-field").IsVisibleAsync())
@@ -75,7 +75,7 @@ public class PlaywrightTests
                 await page.Locator("#api-key-field").PressAsync("Enter");
             }
 
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             // Click text=Latitude: >> input[type="number"]
             await page.ScreenshotAsync(new PageScreenshotOptions
@@ -135,7 +135,7 @@ public class PlaywrightTests
                 FullPage = true
             });
 
-            Task pageLoadTask = page.WaitForURLAsync("https://localhost:7255/source-code/navigation");
+            Task pageLoadTask = page.WaitForURLAsync("http://localhost:5255/source-code/navigation");
 
             // Click text=Source Code
             await page.Locator("text=Source Code").ClickAsync();
@@ -149,10 +149,10 @@ public class PlaywrightTests
 
             // Click text=Drawing
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/drawing");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/drawing");
             await page.Locator("text=Drawing").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -330,7 +330,7 @@ public class PlaywrightTests
             });
 
             // Click text=Source Code
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/source-code/drawing");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/source-code/drawing");
             await page.Locator("text=Source Code").ClickAsync();
             await pageLoadTask;
 
@@ -342,7 +342,7 @@ public class PlaywrightTests
 
             // Click text=Scene >> nth=0
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/scene");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/scene");
             await page.Locator("text=Scene").First.ClickAsync();
             Console.WriteLine("button click ran");
             await pageLoadTask;
@@ -359,10 +359,10 @@ public class PlaywrightTests
 
             // Click text=Widgets
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/widgets");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/widgets");
             await page.Locator("text=Widgets").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -515,7 +515,7 @@ public class PlaywrightTests
             });
 
             // Click text=Source Code
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/source-code/widgets");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/source-code/widgets");
             await page.Locator("text=Source Code").ClickAsync();
             await pageLoadTask;
             await Task.Delay(1000);
@@ -528,10 +528,10 @@ public class PlaywrightTests
 
             // Click text=Basemaps
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/basemaps");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/basemaps");
             await page.Locator("text=Basemaps").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -542,7 +542,7 @@ public class PlaywrightTests
             // Check text=From Portal Id >> input[name="basemap-type"]
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.GetByText("From Portal Id").CheckAsync();
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -553,7 +553,7 @@ public class PlaywrightTests
             // Check text=From Tile Layers >> input[name="basemap-type"]
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.GetByText("From Tile Layers").CheckAsync();
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -562,7 +562,7 @@ public class PlaywrightTests
             });
 
             // Click text=Source Code
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/source-code/basemaps");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/source-code/basemaps");
             await page.Locator("text=Source Code").ClickAsync();
             await pageLoadTask;
             await Task.Delay(1000);
@@ -575,10 +575,10 @@ public class PlaywrightTests
 
             // Click text=Feature Layers
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/feature-layers");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/feature-layers");
             await page.Locator("text=Feature Layers").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -589,7 +589,7 @@ public class PlaywrightTests
             // Check text=Show Trailheads Points Layer: >> input[name="points"]
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.GetByText("Show Trailheads Points Layer").CheckAsync();
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -600,7 +600,7 @@ public class PlaywrightTests
             // Check text=Show Trailheads Lines Layer: >> input[name="points"]
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.GetByText("Show Trailheads Lines Layer").CheckAsync();
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -613,7 +613,7 @@ public class PlaywrightTests
 
             await page.GetByText("Show Trailheads Lines With Elevation Style Renderer")
                 .CheckAsync();
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -637,7 +637,7 @@ public class PlaywrightTests
             // Check text=Show Trailheads Polygons Layer: >> input[name="points"]
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.GetByText("Show Trailheads Polygons Layer").CheckAsync();
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -647,10 +647,10 @@ public class PlaywrightTests
 
             // Click text=Vector Layer
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/vector-layer");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/vector-layer");
             await page.GetByText("Vector Layer").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -659,7 +659,7 @@ public class PlaywrightTests
             });
 
             // Click text=Source Code
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/source-code/vector-layer");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/source-code/vector-layer");
             await page.Locator("text=Source Code").ClickAsync();
             await pageLoadTask;
             await Task.Delay(1000);
@@ -672,10 +672,10 @@ public class PlaywrightTests
 
             // Click text=Web Map
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/web-map");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/web-map");
             await page.Locator("text=Web Map").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -685,7 +685,7 @@ public class PlaywrightTests
 
             // Click text=Web Scene
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/web-scene");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/web-scene");
             await page.Locator("text=Web Scene").ClickAsync();
             await pageLoadTask;
             await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
@@ -697,10 +697,10 @@ public class PlaywrightTests
             });
 
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/sql-query");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/sql-query");
             await page.Locator("text=SQL Query").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -711,7 +711,7 @@ public class PlaywrightTests
             // Select UseType = 'Residential'
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Locator("select").SelectOptionAsync(new[] { "UseType = 'Residential'" });
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -722,7 +722,7 @@ public class PlaywrightTests
             // Select UseType = 'Irrigated Farm'
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Locator("select").SelectOptionAsync(new[] { "UseType = 'Irrigated Farm'" });
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -733,7 +733,7 @@ public class PlaywrightTests
             // Select TaxRateArea = 08637
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Locator("select").SelectOptionAsync(new[] { "TaxRateArea = 08637" });
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -744,7 +744,7 @@ public class PlaywrightTests
             // Select Roll_LandValue < 1000000
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Locator("select").SelectOptionAsync(new[] { "Roll_LandValue < 1000000" });
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -753,7 +753,7 @@ public class PlaywrightTests
             });
 
             // Click text=Source Code
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/source-code/sql-query");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/source-code/sql-query");
             await page.Locator("text=Source Code").ClickAsync();
             await pageLoadTask;
             await Task.Delay(1000);
@@ -766,10 +766,10 @@ public class PlaywrightTests
 
             // Click text=SQL Filter Query
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/sql-filter-query");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/sql-filter-query");
             await page.Locator("text=SQL Filter").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -780,7 +780,7 @@ public class PlaywrightTests
             // Select Roll_LandValue < 200000
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Locator("select").SelectOptionAsync(new[] { "Roll_LandValue < 200000" });
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -791,7 +791,7 @@ public class PlaywrightTests
             // Select Bedrooms5 > 0
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Locator("select").SelectOptionAsync(new[] { "Bedrooms5 > 0" });
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -802,7 +802,7 @@ public class PlaywrightTests
             // Select Roll_RealEstateExemp > 0
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Locator("select").SelectOptionAsync(new[] { "Roll_RealEstateExemp > 0" });
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -812,10 +812,10 @@ public class PlaywrightTests
 
             // Click text=Place Selector
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/place-selector");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/place-selector");
             await page.Locator("text=Place Selector").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -826,7 +826,7 @@ public class PlaywrightTests
             // Select Coffee shop
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Locator("select").SelectOptionAsync(new[] { "Coffee shop" });
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -836,10 +836,10 @@ public class PlaywrightTests
 
             // Click text=Routing
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/routing");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/routing");
             await page.Locator("text=Routing").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -860,7 +860,7 @@ public class PlaywrightTests
             // Click canvas
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Mouse.ClickAsync(954, 348);
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -870,10 +870,10 @@ public class PlaywrightTests
 
             // Click text=Service Areas
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/service-areas");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/service-areas");
             await page.Locator("text=Service Areas").ClickAsync();
             await pageLoadTask;
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -884,7 +884,7 @@ public class PlaywrightTests
             // Click canvas
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Mouse.ClickAsync(505, 339);
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -895,7 +895,7 @@ public class PlaywrightTests
             // Click canvas
             waitForRenderTask = page.WaitForConsoleMessageAsync(renderMessage);
             await page.Mouse.ClickAsync(950, 442);
-            await waitForRenderTask;
+            await RunTaskIfNotRendered(DateTime.Now, waitForRenderTask);
 
             await page.ScreenshotAsync(new PageScreenshotOptions
             {
@@ -904,7 +904,7 @@ public class PlaywrightTests
             });
 
             // Click text=Source Code
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/source-code/service-areas");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/source-code/service-areas");
             await page.Locator("text=Source Code").ClickAsync();
             await pageLoadTask;
             await Task.Delay(1000);
@@ -916,7 +916,7 @@ public class PlaywrightTests
             });
 
             // Click text=About
-            pageLoadTask = page.WaitForURLAsync("https://localhost:7255/");
+            pageLoadTask = page.WaitForURLAsync("http://localhost:5255/");
             await page.Locator("text=Home").ClickAsync();
             await pageLoadTask;
             await Task.Delay(1000);
@@ -972,6 +972,7 @@ public class PlaywrightTests
 
     private static void StartServer()
     {
+        Console.WriteLine("Starting server");
         var processStartInfo = new ProcessStartInfo("dotnet",
             "run --project ../../../../../samples/dymaptic.GeoBlazor.Core.Sample.Server/dymaptic.GeoBlazor.Core.Sample.Server.csproj --no-build")
         {
@@ -984,23 +985,32 @@ public class PlaywrightTests
 
     private static void StopServer()
     {
+        Console.WriteLine("Stopping server");
         if (_serverProcess is not null && !_serverProcess.HasExited)
         {
+
             _serverProcess.CloseMainWindow();
             _serverProcess.Kill();
+            Console.WriteLine("Server Stopped");
         }
 
         _serverProcess = null;
     }
 
+    int renderTasks = 0;
     private async Task RunTaskIfNotRendered(DateTime startTime, Task waitForRenderTask)
     {
         var lastEntry = _consoleEntries.Last();
 
-        if (lastEntry.Key > startTime.AddMinutes(.5) || !lastEntry.Value.Contains("View Render Complete"))
+        if (_consoleEntries.Count(x => x.Value.Contains("View Render Complete")) <= renderTasks)
         {
             await waitForRenderTask;
         }
+        renderTasks++;
+        //if (lastEntry.Key > startTime.AddSeconds(2) || !lastEntry.Value.Contains("View Render Complete"))
+        //{
+        //    await waitForRenderTask;
+        //}
     }
 
     private Dictionary<DateTime, string> _consoleEntries = new();

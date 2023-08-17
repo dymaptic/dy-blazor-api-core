@@ -25,7 +25,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".wsv"] = "application/octet-stream";

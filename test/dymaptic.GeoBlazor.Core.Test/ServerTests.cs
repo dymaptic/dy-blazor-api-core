@@ -39,7 +39,7 @@ public class ServerTests
 
             // Go to http://localhost:5199/
 
-            await page.GotoAsync("https://localhost:7161/");
+            await page.GotoAsync("http://localhost:5199/");
             await Task.Delay(1000);
 
             await waitForRenderTask;
@@ -92,6 +92,7 @@ public class ServerTests
 
     private static void StartServer()
     {
+        Console.WriteLine("Starting server");
         var processStartInfo = new ProcessStartInfo("dotnet",
             "run --project ../../../../../test/dymaptic.GeoBlazor.Core.Test.Blazor.Server/dymaptic.GeoBlazor.Core.Test.Blazor.Server.csproj --no-build")
         {
@@ -104,10 +105,13 @@ public class ServerTests
 
     private static void StopServer()
     {
+        Console.WriteLine("Stopping server");
         if (_serverProcess is not null && !_serverProcess.HasExited)
         {
+
             _serverProcess.CloseMainWindow();
             _serverProcess.Kill();
+            Console.WriteLine("Server Stopped");
         }
 
         _serverProcess = null;
