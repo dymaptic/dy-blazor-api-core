@@ -49,8 +49,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         body: ${{env.PR_DESCRIPTION}}
-        tag_name: "v${{env.PRO_VERSION}}"
+        tag_name: "v${{env.CORE_VERSION}}"
         generate_release_notes: true
-        prerelease: true
+        prerelease: false
         files: |
           ./src/dymaptic.GeoBlazor.Core/bin/Release/dymaptic.GeoBlazor.Core.*.nupkg

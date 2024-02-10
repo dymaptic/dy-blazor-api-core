@@ -1,0 +1,32 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Main Branch Release Build
+
+on:
+  push:
+    branches: [ * ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Copy Build Versions
+        run: |
+          echo "CORE_VERSION=2.5.3.1" >> $GITHUB_ENV
+      - name: Copy PR Release Notes
+        run: |
+          PR_DESCRIPTION=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&sort=updated&direction=desc" | \
+          jq -r '.[0].body')
+          echo "PR_DESCRIPTION=$PR_DESCRIPTION" >> $GITHUB_ENV
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{env.PR_DESCRIPTION}}
+          tag_name: "v${{env.CORE_VERSION}}"
+          generate_release_notes: true
+          prerelease: false
