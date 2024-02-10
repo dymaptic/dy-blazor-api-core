@@ -5,7 +5,7 @@ name: Main Branch Release Build
 
 on:
   push:
-    branches: *
+    branches: ["test/release-notes"]
 
 jobs:
   build:
