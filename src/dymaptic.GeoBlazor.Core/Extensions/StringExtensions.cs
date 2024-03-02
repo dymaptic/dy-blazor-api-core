@@ -17,17 +17,24 @@ internal static class StringExtensions
 
     public static string ToKebabCase(this string val)
     {
-        return string.Create(val.Length + (val.Count(char.IsUpper) - 1), val, (span, txt) =>
+        bool usesUnderscores = val.Contains('_');
+        int length = usesUnderscores ? val.Length : val.Length + (val.Count(char.IsUpper) - 1);
+        return string.Create(length, val, (span, txt) =>
         {
             var offset = 0;
-
+            
             for (var i = 0; i < txt.Length; i++)
             {
                 char c = txt[i];
 
-                if (char.IsUpper(c))
+                if (c == '_')
                 {
-                    if (i > 0)
+                    usesUnderscores = true;
+                    span[i + offset] = '-';
+                }
+                else if (char.IsUpper(c))
+                {
+                    if (!usesUnderscores && i > 0)
                     {
                         span[i + offset] = '-';
                         offset++;

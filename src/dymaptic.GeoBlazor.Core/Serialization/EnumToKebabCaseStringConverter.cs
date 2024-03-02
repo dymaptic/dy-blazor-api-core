@@ -17,14 +17,31 @@ public class EnumToKebabCaseStringConverter<T> : JsonConverter<T> where T : notn
     /// <inheritdoc />
     public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        string? value = reader.GetString()
+        string? originalValue = reader.GetString();
+        string? value = originalValue
             ?.Replace("-", string.Empty)
             .Replace("esri", string.Empty)
             .Replace(typeof(T).Name, string.Empty);
 
         try
         {
-            return value is not null ? (T)Enum.Parse(typeof(T), value, true) : default(T)!;
+            if (value is not null)
+            {
+                if (Enum.TryParse(typeof(T), value, true, out object? result))
+                {
+                    return (T)result!;
+                }
+                
+                foreach (string name in Enum.GetNames(typeof(T)))
+                {
+                    if (name.ToKebabCase() == originalValue)
+                    {
+                        return (T)Enum.Parse(typeof(T), name, true);
+                    }
+                }
+            }
+
+            return default(T)!;
         }
         catch (Exception ex)
         {
