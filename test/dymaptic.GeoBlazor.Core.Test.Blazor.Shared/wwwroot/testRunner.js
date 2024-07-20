@@ -15,6 +15,20 @@ export function assertBasemapHasTwoLayers(methodName) {
     }
 }
 
+export function assertBasemapHasStyle(methodName, style) {
+    let view = getView(methodName);
+    if (view.map.basemap.style.id !== style) {
+        throw new Error("Basemap does not have expected style");
+    }
+}
+
+export function assertBasemapHasPortalItemId(methodName, portalItemId) {
+    let view = getView(methodName);
+    if (view.map.basemap.portalItem.id !== portalItemId) {
+        throw new Error("Basemap does not have expected portalItemId");
+    }
+}
+
 export function assertWidgetExists(methodName, widgetClass) {
     let view = getView(methodName);
     let widget = view.ui._components.find(c => c.widget.declaredClass === widgetClass)

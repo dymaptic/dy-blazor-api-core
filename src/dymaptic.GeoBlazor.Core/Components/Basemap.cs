@@ -1,5 +1,6 @@
 ﻿using dymaptic.GeoBlazor.Core.Components.Layers;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.Json;
@@ -37,6 +38,13 @@ public class Basemap : MapComponent
     ///     Use of the basemap style service requires authentication via an API key or user authentication. To learn more about API keys, see the API keys section in the ArcGIS Developer documentation.
     /// </summary>
     public BasemapStyle? Style { get; set; }
+
+    /// <inheritdoc />
+    public override void Refresh()
+    {
+        _basemapChanged = true;
+        base.Refresh();
+    }
 
     /// <inheritdoc />
     public override async Task RegisterChildComponent(MapComponent child)
@@ -91,6 +99,20 @@ public class Basemap : MapComponent
                 break;
         }
     }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (_basemapChanged && MapRendered && Parent is Map map)
+        {
+            _basemapChanged = false;
+            Layers.RemoveAll(l => l.Imported);
+
+            string mapType = Parent is WebMap ? "webmap" : "map";
+            await JsModule!.InvokeVoidAsync("setBasemap", map.View!.Id,  map, mapType);
+        }
+    }
 
     /// <inheritdoc />
     internal override void ValidateRequiredChildren()
@@ -104,6 +126,11 @@ public class Basemap : MapComponent
             layer.ValidateRequiredChildren();
         }
     }
+
+    /// <summary>
+    ///     Indicates if the layer has changed since the last render.
+    /// </summary>
+    private bool _basemapChanged;
 }
 
 /// <summary>

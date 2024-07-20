@@ -300,36 +300,8 @@ export async function buildMapView(id: string, dotNetReference: any, long: numbe
         dotNetRefs[id] = dotNetRef;
         let view: View;
 
-        let basemap: Basemap | undefined = undefined;
-        let basemapLayers: any[] = [];
-        if (!mapType.startsWith('web')) {
-            if (mapObject.arcGISDefaultBasemap !== undefined &&
-                mapObject.arcGISDefaultBasemap !== null) {
-                basemap = mapObject.arcGISDefaultBasemap;
-            } else if (hasValue(mapObject.basemap?.style)) {
-                let style = new BasemapStyle({
-                    id: mapObject.basemap.style.name
-                });
-                if (hasValue(mapObject.basemap.style.language)) {
-                    style.language = mapObject.basemap.style.language
-                }
-                if (hasValue(mapObject.basemap.style.serviceUrl)) {
-                    style.serviceUrl = mapObject.basemap.style.serviceUrl;
-                }
-                basemap = new Basemap({ style: style })
-            } else if (hasValue(mapObject.basemap?.portalItem?.id)) {
-                let portalItem = buildJsPortalItem(mapObject.basemap.portalItem);
-                basemap = new Basemap({ portalItem: portalItem });
-            } else if (mapObject.basemap?.layers.length > 0) {
-                for (let i = 0; i < mapObject.basemap.layers.length; i++) {
-                    const layerObject = mapObject.basemap.layers[i];
-                    basemapLayers.push(layerObject);
-                }
-                basemap = new Basemap({
-                    baseLayers: []
-                });
-            }
-        }
+        let basemap = getBasemap(mapObject, mapType);
+        let basemapLayers = getBasemapLayers(mapObject, mapType);
 
         switch (mapType) {
             case 'webmap':
@@ -468,6 +440,71 @@ export async function buildMapView(id: string, dotNetReference: any, long: numbe
         unsetWaitCursor(id);
     } catch (error) {
         logError(error, id);
+    }
+}
+
+// converts the GeoBlazor basemap object to an ArcGIS basemap
+function getBasemap(mapObject: any, mapType: string): Basemap | undefined {
+    let basemap: Basemap | undefined = undefined;
+
+    // webmaps do not support basemaps
+    if (!mapType.startsWith('web')) {
+        // check for the legacy `arcGISDefaultBasemap` from early GeoBlazor
+        if (hasValue(mapObject.arcGISDefaultBasemap)) {
+            basemap = mapObject.arcGISDefaultBasemap;
+        // check for newer basemap styles (preferred pattern)
+        } else if (hasValue(mapObject.basemap?.style)) {
+            let style = new BasemapStyle({
+                id: mapObject.basemap.style.name
+            });
+            if (hasValue(mapObject.basemap.style.language)) {
+                style.language = mapObject.basemap.style.language
+            }
+            if (hasValue(mapObject.basemap.style.serviceUrl)) {
+                style.serviceUrl = mapObject.basemap.style.serviceUrl;
+            }
+            basemap = new Basemap({ style: style })
+        // check if the basemap is a portal item in AGOL or Portal
+        } else if (hasValue(mapObject.basemap?.portalItem?.id)) {
+            let portalItem = buildJsPortalItem(mapObject.basemap.portalItem);
+            basemap = new Basemap({ portalItem: portalItem });
+        // if there are basemap layers, create an empty basemap so we can add those
+        } else if (mapObject.basemap?.layers.length > 0) {
+            basemap = new Basemap({
+                baseLayers: []
+            });
+        }
+    }
+
+    return basemap;
+}
+
+// retrieves the basemap layers from the mapObject
+function getBasemapLayers(mapObject: any, mapType: string): any[] {
+    if (!mapType.startsWith('web')
+        && !mapObject.arcGISDefaultBasemap
+        && !hasValue(mapObject.basemap?.style)
+        && !hasValue(mapObject.basemap?.portalItem?.id)
+        && mapObject.basemap?.layers?.length > 0) {
+        return mapObject.basemap.layers.map(layer => layer);
+    }
+
+    return [];
+}
+
+export async function setBasemap(viewId: string, mapObject: any, mapType: string) {
+    let basemap = getBasemap(mapObject, mapType);
+
+    if (basemap instanceof Basemap) {
+
+        let view = arcGisObjectRefs[viewId] as View;
+        view.map.basemap = basemap;
+
+        let basemapLayers = getBasemapLayers(mapObject, mapType);
+
+        for (let i = basemapLayers.length - 1; i >= 0; i--) {
+            await addLayer(basemapLayers[i], viewId, true);
+        }
     }
 }
 

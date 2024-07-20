@@ -2138,8 +2138,6 @@ public partial class MapView : MapComponent
 
         await InvokeAsync(async () =>
         {
-            Console.WriteLine("Rendering View");
-
             if (Map is null)
             {
                 throw new MissingMapException();
