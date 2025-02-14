@@ -29,6 +29,7 @@ import Widget from "@arcgis/core/widgets/Widget";
 import Measurement from "@arcgis/core/widgets/Measurement";
 import AreaMeasurement2D from "@arcgis/core/widgets/AreaMeasurement2D";
 import Bookmarks from "@arcgis/core/widgets/Bookmarks";
+import BookmarksVisibleElements from "@arcgis/core/widgets/Bookmarks/BookmarksVisibleElements";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
@@ -99,7 +100,8 @@ import {
     buildJsSpatialReference,
     buildJsSublayer,
     buildJsSymbol,
-    buildJsTickConfig
+    buildJsTickConfig,
+    buildJsViewpoint
 } from "./jsBuilder";
 import {
     DotNetExtent,
@@ -1215,9 +1217,18 @@ export async function updateWidget(widgetObject: any, viewId: string): Promise<v
 
         switch (widgetObject.type) {
             case 'bookmarks':
-                let bookmarks = currentWidget as Bookmarks;
+                let bookmarkWidget = currentWidget as Bookmarks;
                 if (hasValue(widgetObject.bookmarks)) {
-                    bookmarks.bookmarks = widgetObject.bookmarks.map(buildJsBookmark);
+                    bookmarkWidget.bookmarks = widgetObject.bookmarks.map(buildJsBookmark);
+                }
+                copyValuesIfExists(currentWidget, bookmarkWidget, 'editingEnabled', 'dragEnabled');
+                //copy values, otherwise clear the object
+                if (hasValue(widgetObject.visibleElements)) {
+                    copyValuesIfExists(widgetObject.visibleElements, bookmarkWidget.visibleElements, 'addBookmark',
+                        'addBookmarkButton', 'closeButton', 'collapseButton', 'editBookmarkButton', 'filter', 'flow', 'heading', 'thumbnail', 'time');
+                }
+                else {
+                    bookmarkWidget.visibleElements = new BookmarksVisibleElements();
                 }
                 break;
             case 'search':
@@ -2009,6 +2020,11 @@ async function createWidget(widget: any, viewId: string): Promise<Widget | null>
             const homeBtn = new Home({
                 view: view,
             });
+            if (hasValue(widget.viewPoint)) {
+                // @ts-ignore
+                homeBtn.viewpoint = buildJsViewpoint(widget.viewPoint);
+            }
+            copyValuesIfExists(widget, homeBtn, "label")
             newWidget = homeBtn;
             break;
         case 'compass':
@@ -2155,10 +2171,14 @@ async function createWidget(widget: any, viewId: string): Promise<Widget | null>
         case 'bookmarks':
             const bookmarkWidget = new Bookmarks({
                 view: view,
-                editingEnabled: widget.editingEnabled,
                 disabled: widget.disabled,
                 icon: widget.icon
             });
+            copyValuesIfExists(widget, bookmarkWidget, 'editingEnabled', 'dragEnabled');
+            if (hasValue(widget.visibleElements)) {
+                copyValuesIfExists(widget.visibleElements, bookmarkWidget.visibleElements, 'addBookmark',
+                    'addBookmarkButton', 'closeButton', 'collapseButton', 'editBookmarkButton', 'filter', 'flow', 'heading', 'thumbnail', 'time');
+            }
             if (widget.bookmarks != null) {
                 bookmarkWidget.bookmarks = widget.bookmarks.map(buildJsBookmark);
             }
@@ -2958,14 +2978,15 @@ function waitForRender(viewId: string, dotNetRef: any): void {
             }
             if (!view.updating && !isRendered && !rendering) {
                 notifyExtentChanged = true;
-                // listen for click on zoom widget
-                if (!zoomWidgetListenerAdded) {
-                    let zoomWidgetButtons = document.querySelectorAll('[title="Zoom in"], [title="Zoom out"]');
-                    for (let i = 0; i < zoomWidgetButtons.length; i++) {
-                        zoomWidgetButtons[i].removeEventListener('click', setUserChangedViewExtent);
-                        zoomWidgetButtons[i].addEventListener('click', setUserChangedViewExtent);
+                // listen for click on widgets. This prevents the extent from being re-set when the user clicks on a widget
+                if (!widgetListenerAdded) {
+                    let widgetQuery = '[title="Zoom in"], [title="Zoom out"], [title="Find my location"], [class="esri-bookmarks__list"], [title="Default map view"], [title="Reset map orientation"]';
+                    let widgetButtons = document.querySelectorAll(widgetQuery);
+                    for (let i = 0; i < widgetButtons.length; i++) {
+                        widgetButtons[i].removeEventListener('click', setUserChangedViewExtent);
+                        widgetButtons[i].addEventListener('click', setUserChangedViewExtent);
                     }
-                    zoomWidgetListenerAdded = true;
+                    widgetListenerAdded = true;
                 }
 
                 console.debug(new Date() + " - View Render Complete");
@@ -2984,7 +3005,7 @@ function waitForRender(viewId: string, dotNetRef: any): void {
     })
 }
 
-let zoomWidgetListenerAdded = false;
+let widgetListenerAdded = false;
 
 function setUserChangedViewExtent() {
     userChangedViewExtent = true;
